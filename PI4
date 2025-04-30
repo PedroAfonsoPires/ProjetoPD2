@@ -1,0 +1,39 @@
+.data
+array:      .word 7, 2, 4, 3, 1
+length:     .word 5
+
+.text
+.globl main
+
+main:
+    la t0, array       # t0 aponta para o início do array
+    lw t1, length      # t1 = tamanho do array
+    li t2, 1           # índice i = 1
+
+loop_i:
+    bge t2, t1, end          # se i >= length, fim
+    slli t3, t2, 2           # t3 = i * 4 (deslocamento no array)
+    add t4, t0, t3           # t4 = &array[i]
+    lw s1, 0(t4)             # s1 = key = array[i]
+    addi t5, t2, -1          # j = i - 1
+    slli t6, t5, 2           # t6 = j * 4
+    add s2, t0, t6           # s2 = &array[j]
+
+loop_j:
+    blt t5, zero, insert     # se j < 0, vai inserir
+    lw s3, 0(s2)             # s3 = array[j]
+    ble s3, s1, insert       # se array[j] <= key, vai inserir
+
+    sw s3, 4(s2)             # array[j+1] = array[j]
+    addi t5, t5, -1          # j--
+    addi s2, s2, -4          # move ponteiro para trás
+    j loop_j
+
+insert:
+    sw s1, 4(s2)             # array[j+1] = key
+    addi t2, t2, 1           # i++
+    j loop_i
+
+end:
+    li a7, 10
+    ecall
